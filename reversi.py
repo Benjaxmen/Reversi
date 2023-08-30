@@ -1,6 +1,5 @@
 import sys
 import tkinter as tk
-from PIL import Image, ImageTk
 """ 
 Funciones relevantes al funcionamiento interno del juego de reversi
 """
@@ -106,70 +105,68 @@ def puntajes(tablero):
 """
 Aqui van las funciones necesarias para poder hacer una interfaz gráfica
 """
-def start_game(board_size):
-    if board_size == 6:
-        tablero = generar_tablero_6()
-        reiniciar_tablero_6(tablero)
-        tablero[1][0] = 'X'
-    elif board_size == 8:
-        tablero = generar_tablero_8()
-        reiniciar_tablero_8(tablero)
-        tablero[1][0] = 'X'
-    mostrar_tablero(tablero)
+import tkinter as tk
+from PIL import Image, ImageTk
 
-def cargar_imagenes():
-    imagenes = {
-        0: ImageTk.PhotoImage(Image.open("vacio.png")),
-        1: ImageTk.PhotoImage(Image.open("blanca.png")),
-        2: ImageTk.PhotoImage(Image.open("negra.png")),
-        "X": ImageTk.PhotoImage(Image.open("sugerencia.png"))
-    }
-    return imagenes
+class ReversiApp:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Reversi Game")
+        self.vacio = tk.PhotoImage(Image.open("vacio.gif"))
+        self.blanca = tk.PhotoImage(Image.open("blanca.gif"))
+        self.sugerencia = tk.PhotoImage(Image.open("sugerencia.gif"))
+        self.negra = tk.PhotoImage(Image.open("negra.gif"))
 
-def generar_tablero_6():
-    tablero = []
-    for i in range(6):
-        tablero.append([0] * 6)
-    return tablero
+        label = tk.Label(self.root, text="Selecciona el tamaño del tablero:")
+        label.pack(pady=10)
 
-def generar_tablero_8():
-    tablero = []
-    for i in range(8):
-        tablero.append([0] * 8)
-    return tablero
+        button_6x6 = tk.Button(self.root, text="6x6", command=lambda: self.start_game(6))
+        button_6x6.pack()
 
-def mostrar_tablero(tablero):
-    imagenes = cargar_imagenes()
+        button_8x8 = tk.Button(self.root, text="8x8", command=lambda: self.start_game(8))
+        button_8x8.pack()
 
-    root = tk.Tk()
-    root.title("Tablero de Reversi")
+        self.root.mainloop()
 
-    frame = tk.Frame(root, bg="light gray")  # Cambia el color de fondo aquí
-    frame.pack()
+    def start_game(self, board_size):
+        if board_size == 6:
+            tablero = self.generar_tablero_6()
+            reiniciar_tablero_6(tablero)
+            tablero[1][0] = 'X'
+        elif board_size == 8:
+            tablero = self.generar_tablero_8()
+            reiniciar_tablero_8(tablero)
+            tablero[1][0] = 'X'
+        self.mostrar_tablero(tablero)
 
-    for fila in tablero:
-        fila_frame = tk.Frame(frame)
-        fila_frame.pack()
-        for valor in fila:
-            label = tk.Label(fila_frame, image=imagenes[valor], relief="ridge")
-            label.pack(side=tk.LEFT)
+    def generar_tablero_6(self):
+        tablero = []
+        for i in range(6):
+            tablero.append([0] * 6)
+        return tablero
 
-    root.mainloop()
+    def generar_tablero_8(self):
+        tablero = []
+        for i in range(8):
+            tablero.append([0] * 8)
+        return tablero
 
-def create_ui():
-    root = tk.Tk()
-    root.title("Reversi Game")
+    def mostrar_tablero(self, tablero):
+        root = tk.Tk()
+        root.title("Tablero de Reversi")
 
-    label = tk.Label(root, text="Selecciona el tamaño del tablero:")
-    label.pack(pady=10)
+        frame = tk.Frame(root, bg="light gray")
+        frame.pack()
 
-    button_6x6 = tk.Button(root, text="6x6", command=lambda: start_game(6))
-    button_6x6.pack()
+        for fila in tablero:
+            fila_frame = tk.Frame(frame)
+            fila_frame.pack()
+            for valor in fila:
+                img = self.vacio if valor == 0 else self.blanca if valor == 1 else self.negra if valor == 2 else self.sugerencia
+                label = tk.Label(fila_frame, image=img, relief="ridge")
+                label.pack(side=tk.LEFT)
 
-    button_8x8 = tk.Button(root, text="8x8", command=lambda: start_game(8))
-    button_8x8.pack()
-
-    root.mainloop()
+        root.mainloop()
 
 if __name__ == "__main__":
-    create_ui()
+    app = ReversiApp()
