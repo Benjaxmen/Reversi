@@ -109,31 +109,42 @@ clock = pygame.time.Clock()
 
 def main():
     running = True
-
+    partida = False
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                partida = True
 
-        screen.fill((128, 128, 128))  # Green background
+        screen.fill((128, 128, 128))  # Gray background
+        claro=(170,170,170)
+        oscuro=(100,100,100)
+        
         ##Reloj
-        # Get the current time
-        current_time = pygame.time.get_ticks() // 1000
+        if partida:
 
-        # Create a font object
-        font = pygame.font.Font(None, pygame.display.Info().current_w//22)
+            # Get the current time
+            current_time = pygame.time.get_ticks() // 1000
 
-        # Render the time as text
-        time_text = font.render(f"Time: {current_time}", True, (255, 255, 255))
+            # Create a font object
+            font = pygame.font.Font(None, pygame.display.Info().current_w//22)
 
-        # Get the text's rectangle and center it at the top of the screen
-        text_rect = time_text.get_rect(center=(pygame.display.Info().current_w // 2, 60))
+            # Render the time as text
+            time_text = font.render(f"Time: {current_time}", True, (255, 255, 255))
 
-        # Draw the time text on the screen
-        screen.blit(time_text, text_rect)
+            # Get the text's rectangle and center it at the top of the screen
+            text_rect = time_text.get_rect(center=(pygame.display.Info().current_w // 2, 60))
 
+            # Draw the time text on the screen
+            screen.blit(time_text, text_rect)
+            clock.tick(60)
+
+        
+        
+        
+        
         pygame.display.flip()
-        clock.tick(60)
 
     pygame.quit()
     sys.exit()
