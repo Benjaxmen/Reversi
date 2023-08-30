@@ -82,6 +82,16 @@ def obt_jugadas_validas(tablero,pieza):
             if movimiento_esvalido(tablero,pieza,x,y)!=False:
                 jugadas_validas.append([x,y])
     return jugadas_validas
+def puntajes(tablero):
+    blancas=0
+    negras=0
+    for x in range(tablero[0]):
+        for y in range(tablero[0]):
+            if tablero[x][y]==1:
+                blancas+=1
+            elif tablero[x][y]==2:
+                negras+=1
+    return {'Blancas':blancas,'Negras':negras}
 
 
 """
@@ -106,7 +116,7 @@ def main():
                 running = False
 
         screen.fill((128, 128, 128))  # Green background
-
+        ##Reloj
         # Get the current time
         current_time = pygame.time.get_ticks() // 1000
 
