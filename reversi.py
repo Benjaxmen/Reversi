@@ -1,5 +1,6 @@
-import pygame
 import sys
+import tkinter as tk
+from PIL import Image, ImageTk
 """ 
 Funciones relevantes al funcionamiento interno del juego de reversi
 """
@@ -73,8 +74,18 @@ def tablero_jugadas(tablero,pieza):
     return tablero2
 
 def copiar_tablero(tablero):
-    #asd
-    return False
+    if len(tablero[0]==8):
+        tablero2=generar_tablero_8()
+        for x in range(8):
+            for y in range(8):
+                tablero2[x][y]=tablero[x][y]
+    else:
+        tablero2=generar_tablero_6()
+        for x in range(6):
+            for y in range(6):
+                tablero2[x][y]=tablero[x][y]
+
+    return tablero2
 def obt_jugadas_validas(tablero,pieza):
     jugadas_validas=[]
     for x in range(len(tablero[0])):
@@ -92,62 +103,73 @@ def puntajes(tablero):
             elif tablero[x][y]==2:
                 negras+=1
     return {'Blancas':blancas,'Negras':negras}
-
-
 """
-Funciones relevantes a la interfaz y generación de menú
+Aqui van las funciones necesarias para poder hacer una interfaz gráfica
 """
-pygame.init()
+def start_game(board_size):
+    if board_size == 6:
+        tablero = generar_tablero_6()
+        reiniciar_tablero_6(tablero)
+        tablero[1][0] = 'X'
+    elif board_size == 8:
+        tablero = generar_tablero_8()
+        reiniciar_tablero_8(tablero)
+        tablero[1][0] = 'X'
+    mostrar_tablero(tablero)
 
+def cargar_imagenes():
+    imagenes = {
+        0: ImageTk.PhotoImage(Image.open("vacio.png")),
+        1: ImageTk.PhotoImage(Image.open("blanca.png")),
+        2: ImageTk.PhotoImage(Image.open("negra.png")),
+        "X": ImageTk.PhotoImage(Image.open("sugerencia.png"))
+    }
+    return imagenes
 
-flags= pygame.RESIZABLE
-screen = pygame.display.set_mode((800,600),flags)
-pygame.display.set_caption("Reversi")
+def generar_tablero_6():
+    tablero = []
+    for i in range(6):
+        tablero.append([0] * 6)
+    return tablero
 
-clock = pygame.time.Clock()
+def generar_tablero_8():
+    tablero = []
+    for i in range(8):
+        tablero.append([0] * 8)
+    return tablero
 
+def mostrar_tablero(tablero):
+    imagenes = cargar_imagenes()
 
-def main():
-    running = True
-    partida = False
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                partida = True
+    root = tk.Tk()
+    root.title("Tablero de Reversi")
 
-        screen.fill((128, 128, 128))  # Gray background
-        claro=(170,170,170)
-        oscuro=(100,100,100)
-        
-        ##Reloj
-        if partida:
+    frame = tk.Frame(root, bg="light gray")  # Cambia el color de fondo aquí
+    frame.pack()
 
-            # Get the current time
-            current_time = pygame.time.get_ticks() // 1000
+    for fila in tablero:
+        fila_frame = tk.Frame(frame)
+        fila_frame.pack()
+        for valor in fila:
+            label = tk.Label(fila_frame, image=imagenes[valor], relief="ridge")
+            label.pack(side=tk.LEFT)
 
-            # Create a font object
-            font = pygame.font.Font(None, pygame.display.Info().current_w//22)
+    root.mainloop()
 
-            # Render the time as text
-            time_text = font.render(f"Time: {current_time}", True, (255, 255, 255))
+def create_ui():
+    root = tk.Tk()
+    root.title("Reversi Game")
 
-            # Get the text's rectangle and center it at the top of the screen
-            text_rect = time_text.get_rect(center=(pygame.display.Info().current_w // 2, 60))
+    label = tk.Label(root, text="Selecciona el tamaño del tablero:")
+    label.pack(pady=10)
 
-            # Draw the time text on the screen
-            screen.blit(time_text, text_rect)
-            clock.tick(60)
+    button_6x6 = tk.Button(root, text="6x6", command=lambda: start_game(6))
+    button_6x6.pack()
 
-        
-        
-        
-        
-        pygame.display.flip()
+    button_8x8 = tk.Button(root, text="8x8", command=lambda: start_game(8))
+    button_8x8.pack()
 
-    pygame.quit()
-    sys.exit()
+    root.mainloop()
 
 if __name__ == "__main__":
-    main()
+    create_ui()
