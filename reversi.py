@@ -73,7 +73,7 @@ def tablero_jugadas(tablero,pieza):
     return tablero2
 
 def copiar_tablero(tablero):
-    if len(tablero[0]==8):
+    if len(tablero[0])==8:
         tablero2=generar_tablero_8()
         for x in range(8):
             for y in range(8):
@@ -105,68 +105,59 @@ def puntajes(tablero):
 """
 Aqui van las funciones necesarias para poder hacer una interfaz gráfica
 """
-import tkinter as tk
-from PIL import Image, ImageTk
+def start_game(board_size):
+    if board_size == 6:
+        tablero = generar_tablero_6()
+        reiniciar_tablero_6(tablero)
+        tablero[1][0] = 'X'
+    elif board_size == 8:
+        tablero = generar_tablero_8()
+        reiniciar_tablero_8(tablero)
+        tablero[1][0] = 'X'
+    mostrar_tablero(tablero)
 
-class ReversiApp:
-    def __init__(self):
-        self.root = tk.Tk()
-        self.root.title("Reversi Game")
-        self.vacio = tk.PhotoImage(Image.open("vacio.gif"))
-        self.blanca = tk.PhotoImage(Image.open("blanca.gif"))
-        self.sugerencia = tk.PhotoImage(Image.open("sugerencia.gif"))
-        self.negra = tk.PhotoImage(Image.open("negra.gif"))
+def mostrar_tablero(tablero):
+    root = tk.Tk()
+    root.title("Tablero de Reversi")
 
-        label = tk.Label(self.root, text="Selecciona el tamaño del tablero:")
-        label.pack(pady=10)
+    frame = tk.Frame(root, bg="light gray")  # Cambia el color de fondo aquí
+    frame.pack()
 
-        button_6x6 = tk.Button(self.root, text="6x6", command=lambda: self.start_game(6))
-        button_6x6.pack()
-
-        button_8x8 = tk.Button(self.root, text="8x8", command=lambda: self.start_game(8))
-        button_8x8.pack()
-
-        self.root.mainloop()
-
-    def start_game(self, board_size):
-        if board_size == 6:
-            tablero = self.generar_tablero_6()
-            reiniciar_tablero_6(tablero)
-            tablero[1][0] = 'X'
-        elif board_size == 8:
-            tablero = self.generar_tablero_8()
-            reiniciar_tablero_8(tablero)
-            tablero[1][0] = 'X'
-        self.mostrar_tablero(tablero)
-
-    def generar_tablero_6(self):
-        tablero = []
-        for i in range(6):
-            tablero.append([0] * 6)
-        return tablero
-
-    def generar_tablero_8(self):
-        tablero = []
-        for i in range(8):
-            tablero.append([0] * 8)
-        return tablero
-
-    def mostrar_tablero(self, tablero):
-        root = tk.Tk()
-        root.title("Tablero de Reversi")
-
-        frame = tk.Frame(root, bg="light gray")
-        frame.pack()
-
-        for fila in tablero:
-            fila_frame = tk.Frame(frame)
-            fila_frame.pack()
-            for valor in fila:
-                img = self.vacio if valor == 0 else self.blanca if valor == 1 else self.negra if valor == 2 else self.sugerencia
-                label = tk.Label(fila_frame, image=img, relief="ridge")
+    for fila in tablero:
+        fila_frame = tk.Frame(frame)
+        fila_frame.pack()
+        for valor in fila:
+            if valor == 0:
+                label = tk.Label(fila_frame, width=4, height=2, bg="light gray", relief="ridge")
+                label.pack(side=tk.LEFT)
+            elif valor == 1:
+                ficha = tk.Canvas(fila_frame, width=25, height=25, bg="light gray", highlightthickness=0)
+                ficha.create_oval(5, 5, 20, 20, fill="white")
+                ficha.pack(side=tk.LEFT)
+            elif valor == 2:
+                ficha = tk.Canvas(fila_frame, width=25, height=25, bg="light gray", highlightthickness=0)
+                ficha.create_oval(5, 5, 20, 20, fill="black")
+                ficha.pack(side=tk.LEFT)
+            elif valor == 'X':
+                label = tk.Label(fila_frame, text="X", width=4, height=2, bg="light green", relief="ridge", font=("Helvetica", 12, "bold"))
                 label.pack(side=tk.LEFT)
 
-        root.mainloop()
+    root.mainloop()
+
+def create_ui():
+    root = tk.Tk()
+    root.title("Reversi Game")
+
+    label = tk.Label(root, text="Selecciona el tamaño del tablero:")
+    label.pack(pady=10)
+
+    button_6x6 = tk.Button(root, text="6x6", command=lambda: start_game(6))
+    button_6x6.pack()
+
+    button_8x8 = tk.Button(root, text="8x8", command=lambda: start_game(8))
+    button_8x8.pack()
+
+    root.mainloop()
 
 if __name__ == "__main__":
-    app = ReversiApp()
+    create_ui()
