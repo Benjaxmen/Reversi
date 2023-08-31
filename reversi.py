@@ -120,27 +120,28 @@ def mostrar_tablero(tablero):
     root = tk.Tk()
     root.title("Tablero de Reversi")
 
-    frame = tk.Frame(root, bg="light gray")  # Cambia el color de fondo aquí
+    frame = tk.Frame(root, bg="light gray")
     frame.pack()
 
-    for fila in tablero:
+    for i, fila in enumerate(tablero):
         fila_frame = tk.Frame(frame)
         fila_frame.pack()
-        for valor in fila:
-            if valor == 0:
-                label = tk.Label(fila_frame, width=4, height=2, bg="light gray", relief="ridge")
-                label.pack(side=tk.LEFT)
-            elif valor == 1:
-                ficha = tk.Canvas(fila_frame, width=25, height=25, bg="light gray", highlightthickness=0)
-                ficha.create_oval(5, 5, 20, 20, fill="white")
-                ficha.pack(side=tk.LEFT)
+        for j, valor in enumerate(fila):
+            # Crear un botón para cada casilla
+            cell_button = tk.Button(fila_frame, width=80, height=80, relief="ridge", state=tk.DISABLED)  # Desactivar el clic
+            cell_button.grid(row=i, column=j)
+            
+            # Configurar el contenido del botón según el valor en el tablero
+            if valor == 1:
+                ficha = tk.PhotoImage(file="blanca.gif")  # Ruta a tu imagen blanca
+                cell_button.config(image=ficha)
             elif valor == 2:
-                ficha = tk.Canvas(fila_frame, width=25, height=25, bg="light gray", highlightthickness=0)
-                ficha.create_oval(5, 5, 20, 20, fill="black")
-                ficha.pack(side=tk.LEFT)
+                ficha = tk.PhotoImage(file="negra.gif")  # Ruta a tu imagen negra
+                cell_button.config(image=ficha)
             elif valor == 'X':
-                label = tk.Label(fila_frame, text="X", width=4, height=2, bg="light green", relief="ridge", font=("Helvetica", 12, "bold"))
-                label.pack(side=tk.LEFT)
+                sugerencia=tk.PhotoImage(file="sugerencia.gif")
+                cell_button.config(image=sugerencia)
+
 
     root.mainloop()
 
