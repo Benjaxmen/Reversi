@@ -105,60 +105,68 @@ def puntajes(tablero):
 """
 Aqui van las funciones necesarias para poder hacer una interfaz gráfica
 """
-def start_game(board_size):
-    if board_size == 6:
-        tablero = generar_tablero_6()
-        reiniciar_tablero_6(tablero)
-        tablero[1][0] = 'X'
-    elif board_size == 8:
-        tablero = generar_tablero_8()
-        reiniciar_tablero_8(tablero)
-        tablero[1][0] = 'X'
-    mostrar_tablero(tablero)
+class Reversi:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Reversi Game")
 
-def mostrar_tablero(tablero):
-    root = tk.Tk()
-    root.title("Tablero de Reversi")
+        self.vacio = tk.PhotoImage(file="vacio.gif")
+        self.blanca = tk.PhotoImage(file="blanca.gif")
+        self.negra = tk.PhotoImage(file="negra.gif")
+        self.sugerencia = tk.PhotoImage(file="sugerencia.gif")
 
-    frame = tk.Frame(root, bg="light gray")
-    frame.pack()
+        self.board_size = None
+        self.tablero = None
 
-    for i, fila in enumerate(tablero):
-        fila_frame = tk.Frame(frame)
-        fila_frame.pack()
-        for j, valor in enumerate(fila):
-            # Crear un botón para cada casilla
-            cell_button = tk.Button(fila_frame, width=80, height=80, relief="ridge", state=tk.DISABLED)  # Desactivar el clic
-            cell_button.grid(row=i, column=j)
-            
-            # Configurar el contenido del botón según el valor en el tablero
-            if valor == 1:
-                ficha = tk.PhotoImage(file="blanca.gif")  # Ruta a tu imagen blanca
-                cell_button.config(image=ficha)
-            elif valor == 2:
-                ficha = tk.PhotoImage(file="negra.gif")  # Ruta a tu imagen negra
-                cell_button.config(image=ficha)
-            elif valor == 'X':
-                sugerencia=tk.PhotoImage(file="sugerencia.gif")
-                cell_button.config(image=sugerencia)
+        self.create_ui()
+        self.root.mainloop()
 
+    def start_game(self, board_size):
+        if board_size == 6:
+            self.board_size = 6
+            self.tablero = generar_tablero_6()
+            reiniciar_tablero_6(self.tablero)
+            self.tablero[1][0] = 'X'
+        elif board_size == 8:
+            self.board_size = 8
+            self.tablero = generar_tablero_8()
+            reiniciar_tablero_8(self.tablero)
+            self.tablero[1][0] = 'X'
+        self.mostrar_tablero()
 
-    root.mainloop()
+    def mostrar_tablero(self):
+        self.clear_frame(self.root)
+        
+        frame = tk.Frame(self.root, bg="light gray")
+        frame.pack()
 
-def create_ui():
-    root = tk.Tk()
-    root.title("Reversi Game")
+        for i, fila in enumerate(self.tablero):
+            fila_frame = tk.Frame(frame)
+            fila_frame.pack()
+            for j, valor in enumerate(fila):
+                cell_button = tk.Button(fila_frame, width=80, height=80, relief="ridge", state=tk.DISABLED)
+                cell_button.grid(row=i, column=j)
 
-    label = tk.Label(root, text="Selecciona el tamaño del tablero:")
-    label.pack(pady=10)
+                if valor == 1:
+                    cell_button.config(image=self.blanca)
+                elif valor == 2:
+                    cell_button.config(image=self.negra)
+                elif valor == 'X':
+                    cell_button.config(image=self.sugerencia)
+                else:
+                    cell_button.config(image=self.vacio)
 
-    button_6x6 = tk.Button(root, text="6x6", command=lambda: start_game(6))
-    button_6x6.pack()
+    def create_ui(self):
+        label = tk.Label(self.root, text="Selecciona el tamaño del tablero:")
+        label.pack(pady=10)
 
-    button_8x8 = tk.Button(root, text="8x8", command=lambda: start_game(8))
-    button_8x8.pack()
+        button_6x6 = tk.Button(self.root, text="6x6", command=lambda: self.start_game(6))
+        button_6x6.pack()
 
-    root.mainloop()
-
+        button_8x8 = tk.Button(self.root, text="8x8", command=lambda: self.start_game(8))
+        button_8x8.pack()
+    def clear_frame(self, frame):
+        for widget in frame.winfo_children():
+            widget.destroy()
 if __name__ == "__main__":
-    create_ui()
+    reversi_game = Reversi()
