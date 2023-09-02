@@ -102,6 +102,22 @@ def puntajes(tablero):
             elif tablero[x][y]==2:
                 negras+=1
     return {'Blancas':blancas,'Negras':negras}
+def esquina(x,y,tablero):
+    if len(tablero[0])==6:
+        return (x==0 and y==0) or (x==5 and y==0) or (x==0 and y==5) or (x==5 and y==5)
+    else:
+        return (x==0 and y==0) or (x==7 and y==0) or (x==0 and y==7) or (x==7 and y==7)
+class Jugador:
+    def __init__(self):
+        self.color=None
+        self.puntaje=None
+    def color_ficha(self,color):
+        self.color=color
+    def contar_puntos(self,tablero):
+        if self.color==1:
+            self.puntaje=puntajes(tablero).values()[0]
+        else:
+            self.puntaje=puntajes(tablero).values[1]
 """
 Aqui van las funciones necesarias para poder hacer una interfaz gráfica
 """
