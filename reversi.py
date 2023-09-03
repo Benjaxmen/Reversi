@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import simpledialog
+import random
 """ 
 Funciones relevantes al funcionamiento interno del juego de reversi
 """
@@ -42,7 +43,7 @@ def movimiento_esvalido(tablero, pieza, xstart, ystart):
     #retorna falso si la jugada es invalida o está usada la posicion
     if tablero[xstart][ystart] == 1 or tablero[xstart][ystart]==2 or not esta_en_tablero(tablero,xstart,ystart):
         return False
-    tablero[xstart][ystart] = pieza
+    tablero[xstart][ystart] = pieza#se agrega como placeholder esta pieza
     if pieza == 1:
         otrapieza=2
     else:
@@ -58,18 +59,25 @@ def movimiento_esvalido(tablero, pieza, xstart, ystart):
             y+=ydirection
             if not esta_en_tablero(tablero,x,y):
                 continue
+            while tablero[x][y] == otrapieza:
+                x+=xdirection
+                y+=ydirection
+                if not esta_en_tablero(tablero,x,y):
+                    break
+            if not esta_en_tablero(tablero,x,y):
+                continue
             if tablero[x][y] == pieza:
-                #hay piezas para voltear. reversa hasta el espacio original, anotando todas las piezas en el camino
                 while True:
                     x-=xdirection
                     y-=ydirection
-                    if x == xstart and y==ystart:
+                    if x==xstart and y==ystart:
                         break
                     piezas_giradas.append([x,y])
-    tablero[xstart][ystart]=0
+    tablero[xstart][ystart]=0#se restaura el estado original
     if len(piezas_giradas)==0:
-        return False #si no se da vuelta ninguna figura, no es movimiento válido
+        return False
     return piezas_giradas
+ 
 def tablero_jugadas(tablero,pieza):
     #retorna un tablero nuevo con las jugadas que puede hacer cada jugador
     tablero2=copiar_tablero(tablero)
@@ -124,7 +132,6 @@ class Jugador:
         if self.tablero_anterior is not None:
             self.tablero = self.tablero_anterior
             self.tablero_anterior=None
-
     def jugada(self, tablero, x, y):
         movimiento = movimiento_esvalido(tablero, self.color, x, y)
         copia = copiar_tablero(tablero)
@@ -159,11 +166,16 @@ class Reversi:
 
         self.jugador = Jugador()
         self.jugador.elegir_color()  # El jugador elige su color
+        self.enemigo=Jugador()
 
         self.create_ui()
         self.root.mainloop()
 
     def start_game(self, board_size):
+        if self.jugador.color==1:
+            self.enemigo.color=2
+        else:
+            self.enemigo.color=1
         if board_size == 6:
             self.board_size = 6
             self.tablero = generar_tablero_6()
@@ -217,8 +229,14 @@ class Reversi:
         self.tablero_anterior=self.jugador.jugada(self.tablero, x, y)
         copia_sin_sug(self.tablero)
         self.mostrar_tablero()  # Asegúrate de llamar a mostrar_tablero después de cada jugada válida
+        self.jugada_enemiga()
+        if len(obt_jugadas_validas(self.tablero,self.jugador.color))==0:
+            perdiste=tk.Tk()
+            perdiste.title("Perdiste!")
+            etiqueta=tk.Label(perdiste,text='Te ganó la computadora!')
+            etiqueta.pack()
+
     def mostrar_jugadas(self):
-        self.tablero_anterior=copiar_tablero(self.tablero)
         self.tablero=tablero_jugadas(self.tablero,self.jugador.color)
         self.mostrar_tablero()
 
@@ -244,6 +262,19 @@ class Reversi:
             self.tablero = self.tablero_anterior
             self.tablero_anterior = None
             self.mostrar_tablero()
+    def jugada_enemiga(self):
+        jugadas=obt_jugadas_validas(self.tablero,self.enemigo.color)
+        if len(jugadas)>0:
+            jugada=random.choice(jugadas)
+            self.enemigo.jugada(self.tablero,jugada[0],jugada[1])
+            self.mostrar_tablero()
+        else:
+            ganaste=tk.Tk()
+            ganaste.title("Ganaste!")
+            etiqueta=tk.Label(ganaste,text='Le ganaste a la computadora!')
+            etiqueta.pack()
+        
+
 
     def clear_frame(self, frame):
         for widget in frame.winfo_children():
