@@ -1,5 +1,5 @@
-import sys
 import tkinter as tk
+from tkinter import simpledialog
 """ 
 Funciones relevantes al funcionamiento interno del juego de reversi
 """
@@ -31,11 +31,16 @@ def reiniciar_tablero_6(tablero):
     tablero[3][2]=2
     tablero[3][3]=1
 #validez de una jugada
+def copia_sin_sug(tablero):
+    for x in range(len(tablero[0])):
+        for y in range(len(tablero[0])):
+            if tablero[x][y]=='X':
+                tablero[x][y]=0
 def esta_en_tablero(tablero,x,y):
     return x>=0 and len(tablero[0])>x and y>=0 and len(tablero[0])>y
 def movimiento_esvalido(tablero, pieza, xstart, ystart):
     #retorna falso si la jugada es invalida o está usada la posicion
-    if tablero[xstart][ystart] != 0 or not esta_en_tablero(tablero,xstart,ystart):
+    if tablero[xstart][ystart] == 1 or tablero[xstart][ystart]==2 or not esta_en_tablero(tablero,xstart,ystart):
         return False
     tablero[xstart][ystart] = pieza
     if pieza == 1:
@@ -95,13 +100,13 @@ def obt_jugadas_validas(tablero,pieza):
 def puntajes(tablero):
     blancas=0
     negras=0
-    for x in range(tablero[0]):
-        for y in range(tablero[0]):
+    for x in range(len(tablero[0])):
+        for y in range(len(tablero[0])):
             if tablero[x][y]==1:
                 blancas+=1
             elif tablero[x][y]==2:
                 negras+=1
-    return {'Blancas':blancas,'Negras':negras}
+    return [blancas,negras]
 def esquina(x,y,tablero):
     if len(tablero[0])==6:
         return (x==0 and y==0) or (x==5 and y==0) or (x==0 and y==5) or (x==5 and y==5)
@@ -109,19 +114,36 @@ def esquina(x,y,tablero):
         return (x==0 and y==0) or (x==7 and y==0) or (x==0 and y==7) or (x==7 and y==7)
 class Jugador:
     def __init__(self):
-        self.color=None
-        self.puntaje=None
-    def color_ficha(self,color):
-        self.color=color
-    def contar_puntos(self,tablero):
-        if self.color==1:
-            self.puntaje=puntajes(tablero).values()[0]
-        else:
-            self.puntaje=puntajes(tablero).values[1]
+        self.color = None
+        self.puntaje = None
+
+    def elegir_color(self):
+        self.color = simpledialog.askinteger("Color", "Elija su color (1 para Blancas, 2 para Negras):", minvalue=1, maxvalue=2)
+
+    def deshacer_ultima_jugada(self):
+        if self.tablero_anterior is not None:
+            self.tablero = self.tablero_anterior
+            self.tablero_anterior=None
+
+    def jugada(self, tablero, x, y):
+        movimiento = movimiento_esvalido(tablero, self.color, x, y)
+        copia = copiar_tablero(tablero)
+        if movimiento is not False:
+            self.tablero_anterior = copia
+            for pieza in movimiento:
+                tablero[pieza[0]][pieza[1]] = self.color
+            tablero[x][y]=self.color
+            return copia
+
+
+
+
+
 """
 Aqui van las funciones necesarias para poder hacer una interfaz gráfica
 """
 class Reversi:
+    
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Reversi Game")
@@ -133,6 +155,10 @@ class Reversi:
 
         self.board_size = None
         self.tablero = None
+        self.tablero_anterior = None  # Variable para guardar el tablero anterior
+
+        self.jugador = Jugador()
+        self.jugador.elegir_color()  # El jugador elige su color
 
         self.create_ui()
         self.root.mainloop()
@@ -142,25 +168,30 @@ class Reversi:
             self.board_size = 6
             self.tablero = generar_tablero_6()
             reiniciar_tablero_6(self.tablero)
-            self.tablero[1][0] = 'X'
+
         elif board_size == 8:
             self.board_size = 8
             self.tablero = generar_tablero_8()
             reiniciar_tablero_8(self.tablero)
-            self.tablero[1][0] = 'X'
         self.mostrar_tablero()
 
     def mostrar_tablero(self):
         self.clear_frame(self.root)
-        
+        puntaje=tk.Frame(self.root,bg='light gray')
+        puntaje.pack()
+        contadores=puntajes(self.tablero)
+        contador=tk.Label(puntaje,justify="center",text=f'Blancas:{contadores[0]}          Negras:{contadores[1]}')
+        contador.pack()
         frame = tk.Frame(self.root, bg="light gray")
         frame.pack()
+        
 
         for i, fila in enumerate(self.tablero):
             fila_frame = tk.Frame(frame)
             fila_frame.pack()
             for j, valor in enumerate(fila):
-                cell_button = tk.Button(fila_frame, width=80, height=80, relief="ridge", state=tk.DISABLED)
+                cell_button = tk.Button(fila_frame, width=80, height=80, relief="ridge", state=tk.DISABLED,
+                                       command=lambda x=i, y=j: self.handle_click(x, y))
                 cell_button.grid(row=i, column=j)
 
                 if valor == 1:
@@ -169,9 +200,35 @@ class Reversi:
                     cell_button.config(image=self.negra)
                 elif valor == 'X':
                     cell_button.config(image=self.sugerencia)
+                    cell_button.config(state=tk.ACTIVE)
                 else:
                     cell_button.config(image=self.vacio)
+                    cell_button.config(state=tk.ACTIVE)
 
+        # Agrega el botón de deshacer en un marco separado
+        undo_frame = tk.Frame(frame)
+        undo_frame.pack()
+        button_undo = tk.Button(undo_frame, text="Deshacer", command=self.undo_move)
+        button_undo.pack()
+        button_suggestion=tk.Button(undo_frame, text="Sugerencias",command=self.mostrar_jugadas)
+        button_suggestion.pack()
+
+    def handle_click(self, x, y):
+        self.tablero_anterior=self.jugador.jugada(self.tablero, x, y)
+        copia_sin_sug(self.tablero)
+        self.mostrar_tablero()  # Asegúrate de llamar a mostrar_tablero después de cada jugada válida
+    def mostrar_jugadas(self):
+        self.tablero_anterior=copiar_tablero(self.tablero)
+        self.tablero=tablero_jugadas(self.tablero,self.jugador.color)
+        self.mostrar_tablero()
+
+    def undo_move(self):
+        self.jugador.deshacer_ultima_jugada()
+        self.mostrar_tablero()
+
+    def clear_frame(self, frame):
+        for widget in frame.winfo_children():
+            widget.destroy()
     def create_ui(self):
         label = tk.Label(self.root, text="Selecciona el tamaño del tablero:")
         label.pack(pady=10)
@@ -181,6 +238,13 @@ class Reversi:
 
         button_8x8 = tk.Button(self.root, text="8x8", command=lambda: self.start_game(8))
         button_8x8.pack()
+        
+    def undo_move(self):
+        if self.tablero_anterior is not None:
+            self.tablero = self.tablero_anterior
+            self.tablero_anterior = None
+            self.mostrar_tablero()
+
     def clear_frame(self, frame):
         for widget in frame.winfo_children():
             widget.destroy()
