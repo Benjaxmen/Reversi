@@ -154,6 +154,7 @@ class Reversi:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Reversi Game")
+        self.turno = 0
 
         self.vacio = tk.PhotoImage(file="vacio.gif")
         self.blanca = tk.PhotoImage(file="blanca.gif")
@@ -172,10 +173,22 @@ class Reversi:
         self.root.mainloop()
 
     def start_game(self, board_size):
+        parte=random.choice([1,2])
+        self.turno=parte
         if self.jugador.color==1:
             self.enemigo.color=2
         else:
             self.enemigo.color=1
+        if parte==self.jugador.color:
+            partes=tk.Tk()
+            partes.title("Tu partes!")
+            etiqueta=tk.Label(partes,text='Haz la primera jugada!')
+            etiqueta.pack()
+        else:
+            partes=tk.Tk()
+            partes.title("Tu oponente parte!")
+            etiqueta=tk.Label(partes,text='Juegas segundo!')
+            etiqueta.pack()
         if board_size == 6:
             self.board_size = 6
             self.tablero = generar_tablero_6()
