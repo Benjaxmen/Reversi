@@ -240,9 +240,6 @@ class Reversi:
         self.tablero=tablero_jugadas(self.tablero,self.jugador.color)
         self.mostrar_tablero()
 
-    def undo_move(self):
-        self.jugador.deshacer_ultima_jugada()
-        self.mostrar_tablero()
 
     def clear_frame(self, frame):
         for widget in frame.winfo_children():
@@ -276,8 +273,5 @@ class Reversi:
         
 
 
-    def clear_frame(self, frame):
-        for widget in frame.winfo_children():
-            widget.destroy()
 if __name__ == "__main__":
     reversi_game = Reversi()
