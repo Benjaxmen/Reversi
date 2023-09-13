@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import simpledialog
 import random
 import time
+
 """ 
 Funciones relevantes al funcionamiento interno del juego de reversi
 """
@@ -157,11 +158,12 @@ class Reversi:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Reversi Game")
+        self.dificultad=0
 
-        self.vacio = tk.PhotoImage(file="vacio.gif")
-        self.blanca = tk.PhotoImage(file="blanca.gif")
-        self.negra = tk.PhotoImage(file="negra.gif")
-        self.sugerencia = tk.PhotoImage(file="sugerencia.gif")
+        self.vacio = tk.PhotoImage(file="./alt/vacio.png")
+        self.blanca = tk.PhotoImage(file="./alt/blanca.png")
+        self.negra = tk.PhotoImage(file="./alt/negra.png")
+        self.sugerencia = tk.PhotoImage(file="./alt/posible.png")
 
         self.board_size = None
         self.tablero = None
@@ -218,7 +220,7 @@ class Reversi:
             fila_frame = tk.Frame(frame)
             fila_frame.pack()
             for j, valor in enumerate(fila):
-                cell_button = tk.Button(fila_frame, width=80, height=80, relief="ridge", state=tk.DISABLED,
+                cell_button = tk.Button(fila_frame, width=80, height=80, relief="ridge", state=tk.ACTIVE,
                                        command=lambda x=i, y=j: self.handle_click(x, y))
                 cell_button.grid(row=i, column=j)
 
@@ -228,10 +230,10 @@ class Reversi:
                     cell_button.config(image=self.negra)
                 elif valor == 'X':
                     cell_button.config(image=self.sugerencia)
-                    cell_button.config(state=tk.ACTIVE)
+                    
                 else:
                     cell_button.config(image=self.vacio)
-                    cell_button.config(state=tk.ACTIVE)
+                    
 
         # Agrega el botón de deshacer en un marco separado
         undo_frame = tk.Frame(frame)
@@ -254,6 +256,7 @@ class Reversi:
         copia_sin_sug(self.tablero)
         self.mostrar_tablero()  # Asegúrate de llamar a mostrar_tablero después de cada jugada válida
         self.jugada_enemiga()
+        
         if len(obt_jugadas_validas(self.tablero,self.jugador.color))==0:
             perdiste=tk.Tk()
             perdiste.title("Perdiste!")
@@ -287,6 +290,7 @@ class Reversi:
         jugadas=obt_jugadas_validas(self.tablero,self.enemigo.color)
         if len(jugadas)>0:
             jugada=random.choice(jugadas)
+            
             self.enemigo.jugada(self.tablero,jugada[0],jugada[1])
             self.mostrar_tablero()
         else:
