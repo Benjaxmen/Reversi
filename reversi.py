@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import simpledialog
 import random
+import time
 """ 
 Funciones relevantes al funcionamiento interno del juego de reversi
 """
@@ -134,6 +135,8 @@ class Jugador:
             self.tablero_anterior=None
     def jugada(self, tablero, x, y):
         movimiento = movimiento_esvalido(tablero, self.color, x, y)
+        if movimiento == False:
+            return False
         copia = copiar_tablero(tablero)
         if movimiento is not False:
             self.tablero_anterior = copia
@@ -154,7 +157,6 @@ class Reversi:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Reversi Game")
-        self.turno = 0
 
         self.vacio = tk.PhotoImage(file="vacio.gif")
         self.blanca = tk.PhotoImage(file="blanca.gif")
@@ -173,8 +175,18 @@ class Reversi:
         self.root.mainloop()
 
     def start_game(self, board_size):
+        
+        if board_size == 6:
+            self.board_size = 6
+            self.tablero = generar_tablero_6()
+            reiniciar_tablero_6(self.tablero)
+
+        elif board_size == 8:
+            self.board_size = 8
+            self.tablero = generar_tablero_8()
+            reiniciar_tablero_8(self.tablero)
+        self.mostrar_tablero()
         parte=random.choice([1,2])
-        self.turno=parte
         if self.jugador.color==1:
             self.enemigo.color=2
         else:
@@ -189,16 +201,7 @@ class Reversi:
             partes.title("Tu oponente parte!")
             etiqueta=tk.Label(partes,text='Juegas segundo!')
             etiqueta.pack()
-        if board_size == 6:
-            self.board_size = 6
-            self.tablero = generar_tablero_6()
-            reiniciar_tablero_6(self.tablero)
-
-        elif board_size == 8:
-            self.board_size = 8
-            self.tablero = generar_tablero_8()
-            reiniciar_tablero_8(self.tablero)
-        self.mostrar_tablero()
+            self.jugada_enemiga()
 
     def mostrar_tablero(self):
         self.clear_frame(self.root)
@@ -239,7 +242,15 @@ class Reversi:
         button_suggestion.pack()
 
     def handle_click(self, x, y):
-        self.tablero_anterior=self.jugador.jugada(self.tablero, x, y)
+        
+        jugada_posible=self.jugador.jugada(self.tablero, x, y)
+        if jugada_posible==False:
+            inv=tk.Tk()
+            inv.title("Movimiento Inválido!")
+            etiqueta=tk.Label(inv,text='Movimiento inválido, intenta nuevamente!')
+            etiqueta.pack()
+            return False
+        self.tablero_anterior=jugada_posible
         copia_sin_sug(self.tablero)
         self.mostrar_tablero()  # Asegúrate de llamar a mostrar_tablero después de cada jugada válida
         self.jugada_enemiga()
