@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import simpledialog
 import random
 import time
-
+import threading
 """ 
 Funciones relevantes al funcionamiento interno del juego de reversi
 """
@@ -331,8 +331,9 @@ class Reversi:
         self.tablero_anterior=jugada_posible
         copia_sin_sug(self.tablero)
         self.mostrar_tablero()  # Asegúrate de llamar a mostrar_tablero después de cada jugada válida
+        threading.Timer(1.0,self.jugada_enemiga).start()
+
         
-        self.jugada_enemiga()
         
         if len(obt_jugadas_validas(self.tablero,self.jugador.color))==0:
             perdiste=tk.Tk()
