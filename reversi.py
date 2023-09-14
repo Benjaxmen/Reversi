@@ -134,6 +134,15 @@ class Jugador:
         if self.tablero_anterior is not None:
             self.tablero = self.tablero_anterior
             self.tablero_anterior=None
+
+    @staticmethod
+    def evaluar_tablero(tablero, pieza):
+        contadores = puntajes(tablero)
+        if pieza == 1:
+            return contadores[0] - contadores[1]
+        else:
+            return contadores[1] - contadores[0]
+    
     def jugada(self, tablero, x, y):
         movimiento = movimiento_esvalido(tablero, self.color, x, y)
         if movimiento == False:
@@ -145,7 +154,72 @@ class Jugador:
                 tablero[pieza[0]][pieza[1]] = self.color
             tablero[x][y]=self.color
             return copia
+    def jugada_dificil(self, tablero, x, y, color):
+        movimiento = movimiento_esvalido(tablero, color, x, y)
+        copia = copiar_tablero(tablero)
 
+        if movimiento is not False:
+            self.tablero_anterior = copia
+            for pieza in movimiento:
+                tablero[pieza[0]][pieza[1]] = color
+            tablero[x][y] = color
+            return copia
+        else:
+            self.jugada(self,tablero, x, y, color)
+    @staticmethod
+    def alphabeta(tablero, profundidad, alpha, beta, maximizando, pieza):
+        if profundidad == 0 or len(obt_jugadas_validas(tablero, pieza)) == 0:
+            return Jugador.evaluar_tablero(tablero, pieza)
+
+        if maximizando:
+            max_eval = float('-inf')
+            for x, y in obt_jugadas_validas(tablero, pieza):
+                copia = copiar_tablero(tablero)
+                movimiento = movimiento_esvalido(copia, pieza, x, y)
+                for pieza_girada in movimiento:
+                    copia[pieza_girada[0]][pieza_girada[1]] = pieza
+                copia[x][y] = pieza
+                eval = Jugador.alphabeta(copia, profundidad - 1, alpha, beta, False, pieza)
+                max_eval = max(max_eval, eval)
+                alpha = max(alpha, eval)
+                if beta <= alpha:
+                    break
+            return max_eval
+        else:
+            min_eval = float('inf')
+            for x, y in obt_jugadas_validas(tablero, pieza):
+                copia = copiar_tablero(tablero)
+                movimiento = movimiento_esvalido(copia, pieza, x, y)
+                for pieza_girada in movimiento:
+                    copia[pieza_girada[0]][pieza_girada[1]] = pieza
+                copia[x][y] = pieza
+                eval = Jugador.alphabeta(copia, profundidad - 1, alpha, beta, True, pieza)
+                min_eval = min(min_eval, eval)
+                beta = min(beta, eval)
+                if beta <= alpha:
+                    break
+            return min_eval
+    def jugada_alpha_beta(self, tablero, pieza):
+        jugadas = obt_jugadas_validas(tablero, pieza)
+        mejor_jugada = None
+        mejor_evaluacion = float('-inf')
+        alpha = float('-inf')
+        beta = float('inf')
+        profundidad = 4  # Ajusta la profundidad de búsqueda según lo desees
+
+        for x, y in jugadas:
+            copia = copiar_tablero(tablero)
+            movimiento = movimiento_esvalido(copia, pieza, x, y)
+            for pieza_girada in movimiento:
+                copia[pieza_girada[0]][pieza_girada[1]] = pieza
+            copia[x][y] = pieza
+            evaluacion = Jugador.alphabeta(copia, profundidad - 1, alpha, beta, False, pieza)
+            if evaluacion > mejor_evaluacion:
+                mejor_evaluacion = evaluacion
+                mejor_jugada = (x, y)
+            alpha = max(alpha, evaluacion)
+
+        return mejor_jugada
 
 
 
@@ -156,7 +230,9 @@ Aqui van las funciones necesarias para poder hacer una interfaz gráfica
 class Reversi:
     
     def __init__(self):
-        self.root = tk.Tk()
+        self.root=tk.Tk()
+        self.dif = tk.Tk()
+        self.dif.title("Dificultad:")
         self.root.title("Reversi Game")
         self.dificultad=0
 
@@ -174,6 +250,7 @@ class Reversi:
         self.enemigo=Jugador()
 
         self.create_ui()
+        self.seleccion_dif()
         self.root.mainloop()
 
     def start_game(self, board_size):
@@ -242,7 +319,6 @@ class Reversi:
         button_undo.pack()
         button_suggestion=tk.Button(undo_frame, text="Sugerencias",command=self.mostrar_jugadas)
         button_suggestion.pack()
-
     def handle_click(self, x, y):
         
         jugada_posible=self.jugador.jugada(self.tablero, x, y)
@@ -255,6 +331,7 @@ class Reversi:
         self.tablero_anterior=jugada_posible
         copia_sin_sug(self.tablero)
         self.mostrar_tablero()  # Asegúrate de llamar a mostrar_tablero después de cada jugada válida
+        
         self.jugada_enemiga()
         
         if len(obt_jugadas_validas(self.tablero,self.jugador.color))==0:
@@ -280,25 +357,50 @@ class Reversi:
 
         button_8x8 = tk.Button(self.root, text="8x8", command=lambda: self.start_game(8))
         button_8x8.pack()
-        
+    def seleccion_dif(self):
+        label = tk.Label(self.dif, text="Selecciona la dificultad del bot:")
+        label.pack(pady=10)
+
+        button_easy = tk.Button(self.dif, text="Fácil", command=lambda: self.dificultad_elegir(0))
+        button_easy.pack()
+
+        button_medium = tk.Button(self.dif, text="Normal", command=lambda: self.dificultad_elegir(1))
+        button_medium.pack()
+        button_hard = tk.Button(self.dif, text="Dificil", command=lambda: self.dificultad_elegir(2))
+        button_hard.pack()
+    def dificultad_elegir(self,num):
+        self.dificultad=num
+        return False
+
     def undo_move(self):
         if self.tablero_anterior is not None:
             self.tablero = self.tablero_anterior
             self.tablero_anterior = None
             self.mostrar_tablero()
     def jugada_enemiga(self):
-        jugadas=obt_jugadas_validas(self.tablero,self.enemigo.color)
-        if len(jugadas)>0:
-            jugada=random.choice(jugadas)
-            
-            self.enemigo.jugada(self.tablero,jugada[0],jugada[1])
-            self.mostrar_tablero()
-        else:
-            ganaste=tk.Tk()
-            ganaste.title("Ganaste!")
-            etiqueta=tk.Label(ganaste,text='Le ganaste a la computadora!')
-            etiqueta.pack()
-        
+        if self.dificultad==0:   
+            jugadas=obt_jugadas_validas(self.tablero,self.enemigo.color)
+            if len(jugadas)>0:
+                jugada=random.choice(jugadas)
+                
+                self.enemigo.jugada(self.tablero,jugada[0],jugada[1])
+                self.mostrar_tablero()
+            else:
+                ganaste=tk.Tk()
+                ganaste.title("Ganaste!")
+                etiqueta=tk.Label(ganaste,text='Le ganaste a la computadora!')
+                etiqueta.pack()
+        elif self.dificultad==2:
+            jugada = self.enemigo.jugada_alpha_beta(self.tablero, self.enemigo.color)
+            if jugada is not None:
+                x, y = jugada
+                self.enemigo.jugada_dificil(self.tablero, x, y, self.enemigo.color)
+                self.mostrar_tablero()
+            else:
+                ganaste = tk.Tk()
+                ganaste.title("Ganaste!")
+                etiqueta = tk.Label(ganaste, text='Le ganaste a la computadora!')
+                etiqueta.pack()
 
 
 if __name__ == "__main__":
