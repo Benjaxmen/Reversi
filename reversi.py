@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import simpledialog
 import random
-import time
 import threading
 """ 
 Funciones relevantes al funcionamiento interno del juego de reversi
@@ -199,13 +198,13 @@ class Jugador:
                 if beta <= alpha:
                     break
             return min_eval
-    def jugada_alpha_beta(self, tablero, pieza):
+    def jugada_alpha_beta(self, tablero, pieza,dif):
         jugadas = obt_jugadas_validas(tablero, pieza)
         mejor_jugada = None
         mejor_evaluacion = float('-inf')
         alpha = float('-inf')
         beta = float('inf')
-        profundidad = 4  # Ajusta la profundidad de búsqueda según lo desees
+        profundidad = dif  # Ajusta la profundidad de búsqueda según lo desees
 
         for x, y in jugadas:
             copia = copiar_tablero(tablero)
@@ -391,8 +390,19 @@ class Reversi:
                 ganaste.title("Ganaste!")
                 etiqueta=tk.Label(ganaste,text='Le ganaste a la computadora!')
                 etiqueta.pack()
+        elif self.dificultad==1:
+            jugada = self.enemigo.jugada_alpha_beta(self.tablero, self.enemigo.color,6)
+            if jugada is not None:
+                x, y = jugada
+                self.enemigo.jugada_dificil(self.tablero, x, y, self.enemigo.color)
+                self.mostrar_tablero()
+            else:
+                ganaste = tk.Tk()
+                ganaste.title("Ganaste!")
+                etiqueta = tk.Label(ganaste, text='Le ganaste a la computadora!')
+                etiqueta.pack()
         elif self.dificultad==2:
-            jugada = self.enemigo.jugada_alpha_beta(self.tablero, self.enemigo.color)
+            jugada = self.enemigo.jugada_alpha_beta(self.tablero, self.enemigo.color,20)
             if jugada is not None:
                 x, y = jugada
                 self.enemigo.jugada_dificil(self.tablero, x, y, self.enemigo.color)
