@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import simpledialog
 import random
 import threading
+import time
+import os
 """ 
 Funciones relevantes al funcionamiento interno del juego de reversi
 """
@@ -129,13 +131,20 @@ class Jugador:
         self.color = None
         self.puntaje = None
 
+    def fichaBlanca(self):
+        self.color=1
+           
+    def fichaNegra(self):
+        self.color=2 
+    
     def elegir_color(self):
-        self.color = simpledialog.askinteger("Color", "Elija su color (1 para Blancas, 2 para Negras):", minvalue=1, maxvalue=2)
-
-    def deshacer_ultima_jugada(self):
-        if self.tablero_anterior is not None:
-            self.tablero = self.tablero_anterior
-            self.tablero_anterior=None
+        colorF=tk.Tk()
+        colorF.geometry("200x150")
+        colorF.title("Elegir color de Ficha")
+        titulo=tk.Label(colorF,text="ELEGIR COLOR DE FICHA",fg="green")
+        titulo.pack(padx=10,pady=10,ipadx=10,ipady=10)
+        tk.Button(colorF,text="Ficha Negra", command= self.fichaNegra).pack()
+        tk.Button(colorF,text="Ficha Blanca",command= self.fichaBlanca).pack()
 
     @staticmethod
     def evaluar_tablero(tablero, pieza):
@@ -169,7 +178,8 @@ class Jugador:
         else:
             self.jugada(self,tablero, x, y, color)
     @staticmethod
-    def alphabeta(tablero, profundidad, alpha, beta, maximizando, pieza):
+    def alphabeta(tablero, profundidad, alpha, beta, maximizando, pieza, nodos_explorados):
+        nodos_explorados[0] += 1
         if profundidad == 0 or len(obt_jugadas_validas(tablero, pieza)) == 0:
             return Jugador.evaluar_tablero(tablero, pieza)
 
@@ -181,7 +191,7 @@ class Jugador:
                 for pieza_girada in movimiento:
                     copia[pieza_girada[0]][pieza_girada[1]] = pieza
                 copia[x][y] = pieza
-                eval = Jugador.alphabeta(copia, profundidad - 1, alpha, beta, False, pieza)
+                eval = Jugador.alphabeta(copia, profundidad - 1, alpha, beta, False, pieza, nodos_explorados)
                 max_eval = max(max_eval, eval)
                 alpha = max(alpha, eval)
                 if beta <= alpha:
@@ -195,7 +205,7 @@ class Jugador:
                 for pieza_girada in movimiento:
                     copia[pieza_girada[0]][pieza_girada[1]] = pieza
                 copia[x][y] = pieza
-                eval = Jugador.alphabeta(copia, profundidad - 1, alpha, beta, True, pieza)
+                eval = Jugador.alphabeta(copia, profundidad - 1, alpha, beta, True, pieza, nodos_explorados)
                 min_eval = min(min_eval, eval)
                 beta = min(beta, eval)
                 if beta <= alpha:
@@ -208,6 +218,9 @@ class Jugador:
         alpha = float('-inf')
         beta = float('inf')
         profundidad = dif  # Ajusta la profundidad de búsqueda según lo desees
+        
+        nodos_explorados = [0]
+        start_time = time.time()
 
         for x, y in jugadas:
             copia = copiar_tablero(tablero)
@@ -215,11 +228,15 @@ class Jugador:
             for pieza_girada in movimiento:
                 copia[pieza_girada[0]][pieza_girada[1]] = pieza
             copia[x][y] = pieza
-            evaluacion = Jugador.alphabeta(copia, profundidad - 1, alpha, beta, False, pieza)
+            evaluacion = Jugador.alphabeta(copia, profundidad - 1, alpha, beta, False, pieza, nodos_explorados)
             if evaluacion > mejor_evaluacion:
                 mejor_evaluacion = evaluacion
                 mejor_jugada = (x, y)
             alpha = max(alpha, evaluacion)
+        end_time = time.time()
+        tiempo_total = end_time - start_time
+        print(f"Nodos explorados: {nodos_explorados[0]}")
+        print(f"Tiempo utilizado: {tiempo_total} segundos")
 
         return mejor_jugada
 
@@ -232,17 +249,18 @@ Aqui van las funciones necesarias para poder hacer una interfaz gráfica
 class Reversi:
     
     def __init__(self):
+        script_dir = os.path.dirname(os.path.abspath(__file__))
         self.root=tk.Tk()
         self.dif = tk.Tk()
         self.dif.title("Dificultad:")
         self.root.title("Reversi Game")
         self.dificultad=0
         self.sugerencia=0
-        self.vacio = tk.PhotoImage(file="./alt/vacio.png")
-        self.blanca = tk.PhotoImage(file="./alt/blanca.png")
-        self.negra = tk.PhotoImage(file="./alt/negra.png")
-        self.sugerencias = tk.PhotoImage(file="./alt/sugerencia.png")
-        self.posible = tk.PhotoImage(file="./alt/posible.png")
+        self.vacio = tk.PhotoImage(file=os.path.join(script_dir, "alt", "vacio.png"))
+        self.blanca = tk.PhotoImage(file=os.path.join(script_dir, "alt", "blanca.png"))
+        self.negra = tk.PhotoImage(file=os.path.join(script_dir, "alt", "negra.png"))
+        self.sugerencias = tk.PhotoImage(file=os.path.join(script_dir, "alt", "sugerencia.png"))
+        self.posible = tk.PhotoImage(file=os.path.join(script_dir, "alt", "posible.png"))
 
         self.board_size = None
         self.tablero = None
