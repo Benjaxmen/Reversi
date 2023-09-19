@@ -447,9 +447,11 @@ class Reversi:
 
 
     def clear_frame(self, frame):
+        #reinicia el tablero
         for widget in frame.winfo_children():
             widget.destroy()
     def create_ui(self):
+        #inicializa el tablero
         label = tk.Label(self.root, text="Selecciona el tamaño del tablero:")
         label.pack(pady=10)
 
@@ -459,6 +461,7 @@ class Reversi:
         button_8x8 = tk.Button(self.root, text="8x8", command=lambda: self.start_game(8))
         button_8x8.pack()
     def seleccion_dif(self):
+        #se elige la dificultad
         label = tk.Label(self.dif, text="Selecciona la dificultad del bot:")
         label.pack(pady=10)
 
@@ -474,12 +477,13 @@ class Reversi:
         return False
 
     def undo_move(self):
+        #se rescata el tablero anterior a la jugada
         if self.tablero_anterior is not None:
             self.tablero = self.tablero_anterior
             self.tablero_anterior = None
             self.mostrar_tablero()
     def jugada_enemiga(self):
-
+        #se realiza el movimiento enemigo considerando la dificultad enemiga
         if self.dificultad==0:   
             jugadas=obt_jugadas_validas(self.tablero,self.enemigo.color)
             if len(jugadas)>0:
