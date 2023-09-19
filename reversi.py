@@ -373,8 +373,9 @@ class Reversi:
         button_pass=tk.Button(undo_frame,text="Pasar",command=self.pasar)
         button_pass.pack()
     def pasar(self):
+        #se deja que el enemigo juegue nuevamente
         threading.Timer(1.0,self.jugada_enemiga).start()
-        self.mostrar_tablero()  # Asegúrate de llamar a mostrar_tablero después de cada jugada válida
+        self.mostrar_tablero()  
         contadores=puntajes(self.tablero)
         if not obt_jugadas_validas(self.tablero,self.enemigo.color) and (contadores[0]+contadores[1])!=self.board_size**2 :
             sin_jugadas=tk.Tk()
@@ -400,10 +401,11 @@ class Reversi:
             etiqueta = tk.Label(mensaje, text='No tienes movimientos válidos, pasa tu turno.')
             etiqueta.pack()
     def mostrar_jugadas(self):
+        #se realiza un cambio para que en mostrar_tablero muestre una jugada hecha por la poda alphabeta
         self.sugerencia=1
         self.mostrar_tablero()
     def handle_click(self, x, y):
-        
+        #se realizan las jugadas por el boton presionado, tomando en cuenta la posicion de este
         jugada_posible=self.jugador.jugada(self.tablero, x, y)
         if jugada_posible==False:
             inv=tk.Tk()
