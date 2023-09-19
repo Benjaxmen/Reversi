@@ -391,20 +391,7 @@ class Reversi:
             etiqueta.pack()
             return
         threading.Timer(1.0,self.jugada_enemiga).start()
-        if (contadores[0]+contadores[1])==self.board_size**2:
-            fin=tk.Tk()
-            if (contadores[self.jugador.color-1]>contadores[self.enemigo.color-1]):
-                fin.title("Ganaste!")
-                etiqueta=tk.Label(fin,text='Le ganaste a la computadora!')
-                etiqueta.pack()
-            elif (contadores[self.jugador.color-1]<contadores[self.enemigo.color-1]):
-                fin.title("Perdiste!")
-                etiqueta=tk.Label(fin,text='La computadora te ganó!')
-                etiqueta.pack()
-            else:
-                fin.title("Empate!")
-                etiqueta=tk.Label(fin,text='Empataste con la computadora!')
-                etiqueta.pack()
+        contadores=puntajes(self.tablero)
         if not obt_jugadas_validas(self.tablero,self.jugador.color)and not obt_jugadas_validas(self.tablero,self.enemigo.color) and  (contadores[0]+contadores[1])!=self.board_size**2:
             mensaje = tk.Tk()
             mensaje.title("Sin movimientos válidos")
