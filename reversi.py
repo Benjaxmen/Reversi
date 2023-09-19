@@ -519,7 +519,21 @@ class Reversi:
             mensaje.title("Sin movimientos válidos")
             etiqueta = tk.Label(mensaje, text='No tienes movimientos válidos, pasa tu turno.')
             etiqueta.pack()
-        
+        if (contadores[0]+contadores[1])==self.board_size**2:
+            fin=tk.Tk()
+            if (contadores[self.jugador.color-1]>contadores[self.enemigo.color-1]):
+                fin.title("Ganaste!")
+                etiqueta=tk.Label(fin,text='Le ganaste a la computadora!')
+                etiqueta.pack()
+            elif (contadores[self.jugador.color-1]<contadores[self.enemigo.color-1]):
+                fin.title("Perdiste!")
+                etiqueta=tk.Label(fin,text='La computadora te ganó!')
+                etiqueta.pack()
+            else:
+                fin.title("Empate!")
+                etiqueta=tk.Label(fin,text='Empataste con la computadora!')
+                etiqueta.pack()
+
 
 
 if __name__ == "__main__":
