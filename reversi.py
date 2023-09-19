@@ -136,16 +136,18 @@ class Jugador:
         self.color=2 
     
     def elegir_color(self):
+        #botones para elegir la ficha
         colorF=tk.Tk()
         colorF.geometry("200x150")
         colorF.title("Elegir color de Ficha")
-        titulo=tk.Label(colorF,text="ELEGIR COLOR DE FICHA",fg="green")
+        titulo=tk.Label(colorF,text="ELEGIR COLOR DE FICHA",fg="black")
         titulo.pack(padx=10,pady=10,ipadx=10,ipady=10)
         tk.Button(colorF,text="Ficha Negra", command= self.fichaNegra).pack()
         tk.Button(colorF,text="Ficha Blanca",command= self.fichaBlanca).pack()
 
     @staticmethod
     def evaluar_tablero(tablero, pieza):
+        #
         contadores = puntajes(tablero)
         if pieza == 1:
             return contadores[0] - contadores[1]
@@ -366,6 +368,31 @@ class Reversi:
         button_pass.pack()
     def pasar(self):
         threading.Timer(1.0,self.jugada_enemiga).start()
+        self.mostrar_tablero()  # Asegúrate de llamar a mostrar_tablero después de cada jugada válida
+        contadores=puntajes(self.tablero)
+        if not obt_jugadas_validas(self.tablero,self.enemigo.color) and (contadores[0]+contadores[1])!=self.board_size**2 :
+            sin_jugadas=tk.Tk()
+            sin_jugadas.title("Pasa el turno!")
+            etiqueta=tk.Label(sin_jugadas,text='Tu oponente se quedó sin jugadas, vuelve a jugar!')
+            etiqueta.pack()
+            return
+        if not obt_jugadas_validas(self.tablero,self.jugador.color)and not obt_jugadas_validas(self.tablero,self.enemigo.color) and  (contadores[0]+contadores[1])!=self.board_size**2:
+            mensaje = tk.Tk()
+            mensaje.title("Sin movimientos válidos")
+            if contadores[self.jugador.color-1]>contadores[self.enemigo.color-1]:
+                etiqueta = tk.Label(mensaje, text='Nadie tiene movimientos válidos, pero ganaste!.')
+                etiqueta.pack()
+            elif contadores[self.jugador.color-1]<contadores[self.enemigo.color-1]:
+                etiqueta = tk.Label(mensaje, text='Nadie tiene movimientos válidos, pero ganó la computadora!.')
+                etiqueta.pack()
+            else:
+                etiqueta = tk.Label(mensaje, text='Nadie tiene movimientos válidos, pero empataste!.')
+                etiqueta.pack()
+        elif not obt_jugadas_validas(self.tablero, self.jugador.color) and (contadores[0]+contadores[1])!=self.board_size**2:
+            mensaje = tk.Tk()
+            mensaje.title("Sin movimientos válidos")
+            etiqueta = tk.Label(mensaje, text='No tienes movimientos válidos, pasa tu turno.')
+            etiqueta.pack()
     def mostrar_jugadas(self):
         self.sugerencia=1
         self.mostrar_tablero()
