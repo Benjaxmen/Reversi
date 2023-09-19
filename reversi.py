@@ -35,11 +35,6 @@ def reiniciar_tablero_6(tablero):
     tablero[3][2]=2
     tablero[3][3]=1
 #validez de una jugada
-def copia_sin_sug(tablero):
-    for x in range(len(tablero[0])):
-        for y in range(len(tablero[0])):
-            if tablero[x][y]=='X':
-                tablero[x][y]=0
 def esta_en_tablero(tablero,x,y):
     return x>=0 and len(tablero[0])>x and y>=0 and len(tablero[0])>y
 def movimiento_esvalido(tablero, pieza, xstart, ystart):
@@ -51,7 +46,9 @@ def movimiento_esvalido(tablero, pieza, xstart, ystart):
         otrapieza=2
     else:
         otrapieza=1
+    #se establece una lista de piezas a girar si es que se toma el movimiento
     piezas_giradas=[]
+    #se recorre en las 8 direcciones posibles de la ficha para comprobar si hay fichas del otro color que se puedan dar vuetla
     for xdirection, ydirection in [[0,1],[1,1],[1,0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1]]:
         x,y= xstart,ystart
         x+=xdirection #primer paso en la direccion
@@ -61,14 +58,17 @@ def movimiento_esvalido(tablero, pieza, xstart, ystart):
             x+=xdirection
             y+=ydirection
             if not esta_en_tablero(tablero,x,y):
+                #si no esta en tablero, se salta esta iteracion
                 continue
             while tablero[x][y] == otrapieza:
+                #Se "saltan" las fichas del enemigo
                 x+=xdirection
                 y+=ydirection
                 if not esta_en_tablero(tablero,x,y):
                     break
             if not esta_en_tablero(tablero,x,y):
                 continue
+            #si se pilla una ficha propia en este camino, se empiezan a voltear las piezas enemigas entre estos dos puntos de forma inversa
             if tablero[x][y] == pieza:
                 while True:
                     x-=xdirection
@@ -92,6 +92,7 @@ def tablero_jugadas(tablero,tablero2,pieza):
     return tablero2
 
 def copiar_tablero(tablero):
+    #se hace una copia del tablero
     if len(tablero[0])==8:
         tablero2=generar_tablero_8()
         for x in range(8):
@@ -105,6 +106,7 @@ def copiar_tablero(tablero):
 
     return tablero2
 def obt_jugadas_validas(tablero,pieza):
+    #se comprueban todos los espacios disponibles y se retorna una lista de jugadas validas
     jugadas_validas=[]
     for x in range(len(tablero[0])):
         for y in range(len(tablero[0])):
@@ -112,6 +114,7 @@ def obt_jugadas_validas(tablero,pieza):
                 jugadas_validas.append([x,y])
     return jugadas_validas
 def puntajes(tablero):
+    #recuenta todas las fichas del tablero
     blancas=0
     negras=0
     for x in range(len(tablero[0])):
@@ -121,11 +124,6 @@ def puntajes(tablero):
             elif tablero[x][y]==2:
                 negras+=1
     return [blancas,negras]
-def esquina(x,y,tablero):
-    if len(tablero[0])==6:
-        return (x==0 and y==0) or (x==5 and y==0) or (x==0 and y==5) or (x==5 and y==5)
-    else:
-        return (x==0 and y==0) or (x==7 and y==0) or (x==0 and y==7) or (x==7 and y==7)
 class Jugador:
     def __init__(self):
         self.color = None
@@ -381,7 +379,7 @@ class Reversi:
             etiqueta.pack()
             return False
         self.tablero_anterior=jugada_posible
-        copia_sin_sug(self.tablero)
+        
         self.mostrar_tablero()  # Asegúrate de llamar a mostrar_tablero después de cada jugada válida
         contadores=puntajes(self.tablero)
         if not obt_jugadas_validas(self.tablero,self.enemigo.color) and (contadores[0]+contadores[1])!=self.board_size**2 :
