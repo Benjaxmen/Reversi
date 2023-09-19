@@ -147,7 +147,7 @@ class Jugador:
 
     @staticmethod
     def evaluar_tablero(tablero, pieza):
-        #
+        #se ve el puntaje neto del tablero, si es favorable o no
         contadores = puntajes(tablero)
         if pieza == 1:
             return contadores[0] - contadores[1]
@@ -155,6 +155,7 @@ class Jugador:
             return contadores[1] - contadores[0]
     
     def jugada(self, tablero, x, y):
+        # se realiza una jugada y se devuelve un tablero del estado anterior a esta
         movimiento = movimiento_esvalido(tablero, self.color, x, y)
         if movimiento == False:
             return False
@@ -166,6 +167,7 @@ class Jugador:
             tablero[x][y]=self.color
             return copia
     def jugada_dificil(self, tablero, x, y, color):
+        #se establece una jugada para el enemigo dificil
         movimiento = movimiento_esvalido(tablero, color, x, y)
         copia = copiar_tablero(tablero)
 
@@ -179,6 +181,7 @@ class Jugador:
             self.jugada(self,tablero, x, y, color)
     @staticmethod
     def alphabeta(tablero, profundidad, alpha, beta, maximizando, pieza, nodos_explorados):
+        #se realiza la poda alphabeta y contamos nodos
         nodos_explorados[0] += 1
         if profundidad == 0 or len(obt_jugadas_validas(tablero, pieza)) == 0:
             return Jugador.evaluar_tablero(tablero, pieza)
@@ -212,6 +215,7 @@ class Jugador:
                     break
             return min_eval
     def jugada_alpha_beta(self, tablero, pieza,dif):
+        #se realiza la jugada elegida por alphabeta
         jugadas = obt_jugadas_validas(tablero, pieza)
         mejor_jugada = None
         mejor_evaluacion = float('-inf')
@@ -276,7 +280,7 @@ class Reversi:
         self.root.mainloop()
 
     def start_game(self, board_size):
-        
+        #se elige el tamaño del tablero y los colores, junto a la eleccion de quien parte
         if board_size == 6:
             self.board_size = 6
             self.tablero = generar_tablero_6()
