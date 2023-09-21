@@ -239,6 +239,7 @@ class Jugador:
             alpha = max(alpha, evaluacion)
         end_time = time.time()
         tiempo_total = end_time - start_time
+        tiempo_total=str(tiempo_total).replace('.',',')
         print(f"Nodos explorados: {nodos_explorados[0]}")
         print(f"Tiempo utilizado: {tiempo_total} segundos")
 
@@ -255,6 +256,7 @@ class Reversi:
     def __init__(self):
         script_dir = os.path.dirname(os.path.abspath(__file__))
         self.root=tk.Tk()
+        self.total=4
         self.dif = tk.Tk()
         self.dif.title("Dificultad:")
         self.root.title("Reversi Game")
@@ -321,7 +323,7 @@ class Reversi:
         if self.sugerencia==1:
             jugada = self.jugador.jugada_alpha_beta(self.tablero, self.jugador.color,20)
             self.posibles_jugadas[jugada[0]][jugada[1]]="S"
-        if (contadores[0]+contadores[1])==self.board_size**2:
+        if (self.total)==self.board_size**2:
             fin=tk.Tk()
             if (contadores[self.jugador.color-1]>contadores[self.enemigo.color-1]):
                 fin.title("Ganaste!")
@@ -377,13 +379,7 @@ class Reversi:
         threading.Timer(1.0,self.jugada_enemiga).start()
         self.mostrar_tablero()  
         contadores=puntajes(self.tablero)
-        if not obt_jugadas_validas(self.tablero,self.enemigo.color) and (contadores[0]+contadores[1])!=self.board_size**2 :
-            sin_jugadas=tk.Tk()
-            sin_jugadas.title("Pasa el turno!")
-            etiqueta=tk.Label(sin_jugadas,text='Tu oponente se quedó sin jugadas, vuelve a jugar!')
-            etiqueta.pack()
-            return
-        if not obt_jugadas_validas(self.tablero,self.jugador.color)and not obt_jugadas_validas(self.tablero,self.enemigo.color) and  (contadores[0]+contadores[1])!=self.board_size**2:
+        if not obt_jugadas_validas(self.tablero,self.jugador.color)and not obt_jugadas_validas(self.tablero,self.enemigo.color) and  (self.total)!=self.board_size**2:
             mensaje = tk.Tk()
             mensaje.title("Sin movimientos válidos")
             if contadores[self.jugador.color-1]>contadores[self.enemigo.color-1]:
@@ -395,7 +391,15 @@ class Reversi:
             else:
                 etiqueta = tk.Label(mensaje, text='Nadie tiene movimientos válidos, pero empataste!.')
                 etiqueta.pack()
-        elif not obt_jugadas_validas(self.tablero, self.jugador.color) and (contadores[0]+contadores[1])!=self.board_size**2:
+            return
+        if not obt_jugadas_validas(self.tablero,self.enemigo.color) and (self.total)!=self.board_size**2 :
+            sin_jugadas=tk.Tk()
+            sin_jugadas.title("Pasa el turno!")
+            etiqueta=tk.Label(sin_jugadas,text='Tu oponente se quedó sin jugadas, vuelve a jugar!')
+            etiqueta.pack()
+            
+        
+        elif not obt_jugadas_validas(self.tablero, self.jugador.color) and (self.total)!=self.board_size**2:
             mensaje = tk.Tk()
             mensaje.title("Sin movimientos válidos")
             etiqueta = tk.Label(mensaje, text='No tienes movimientos válidos, pasa tu turno.')
@@ -414,10 +418,10 @@ class Reversi:
             etiqueta.pack()
             return False
         self.tablero_anterior=jugada_posible
-        
+        self.total+=1
         self.mostrar_tablero()  # Asegúrate de llamar a mostrar_tablero después de cada jugada válida
         contadores=puntajes(self.tablero)
-        if not obt_jugadas_validas(self.tablero,self.enemigo.color) and (contadores[0]+contadores[1])!=self.board_size**2 :
+        if not obt_jugadas_validas(self.tablero,self.enemigo.color) and (self.total)!=self.board_size**2 :
             sin_jugadas=tk.Tk()
             sin_jugadas.title("Pasa el turno!")
             etiqueta=tk.Label(sin_jugadas,text='Tu oponente se quedó sin jugadas, vuelve a jugar!')
@@ -425,7 +429,7 @@ class Reversi:
             return
         threading.Timer(1.0,self.jugada_enemiga).start()
         contadores=puntajes(self.tablero)
-        if not obt_jugadas_validas(self.tablero,self.jugador.color)and not obt_jugadas_validas(self.tablero,self.enemigo.color) and  (contadores[0]+contadores[1])!=self.board_size**2:
+        if not obt_jugadas_validas(self.tablero,self.jugador.color)and not obt_jugadas_validas(self.tablero,self.enemigo.color) and  (self.total)!=self.board_size**2:
             mensaje = tk.Tk()
             mensaje.title("Sin movimientos válidos")
             if contadores[self.jugador.color-1]>contadores[self.enemigo.color-1]:
@@ -437,7 +441,7 @@ class Reversi:
             else:
                 etiqueta = tk.Label(mensaje, text='Nadie tiene movimientos válidos, pero empataste!.')
                 etiqueta.pack()
-        elif not obt_jugadas_validas(self.tablero, self.jugador.color) and (contadores[0]+contadores[1])!=self.board_size**2:
+        elif not obt_jugadas_validas(self.tablero, self.jugador.color) and (self.total)!=self.board_size**2:
             mensaje = tk.Tk()
             mensaje.title("Sin movimientos válidos")
             etiqueta = tk.Label(mensaje, text='No tienes movimientos válidos, pasa tu turno.')
@@ -483,6 +487,7 @@ class Reversi:
         if self.tablero_anterior is not None:
             self.tablero = self.tablero_anterior
             self.tablero_anterior = None
+            self.total-=1
             self.mostrar_tablero()
     def jugada_enemiga(self):
         #se realiza el movimiento enemigo considerando la dificultad enemiga
@@ -508,6 +513,7 @@ class Reversi:
                 self.enemigo.jugada_dificil(self.tablero, x, y, self.enemigo.color)
                 self.mostrar_tablero()
         contadores=puntajes(self.tablero)
+        self.total+=1
         if not obt_jugadas_validas(self.tablero,self.jugador.color)and not obt_jugadas_validas(self.tablero,self.enemigo.color) and  (contadores[0]+contadores[1])!=self.board_size**2:
             mensaje = tk.Tk()
             mensaje.title("Sin movimientos válidos")
